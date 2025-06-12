@@ -1,0 +1,13 @@
+configName: default
+folderName: badge
+format_version: v1.0
+frameworkPath: C:\Users\c40249\.mcc\HarmonyContent
+processor: ATSAMD21J18A
+projectName: badge
+settings:
+  PackageFilter: ''
+  FORCE_OPTIMIZATION: 'false'
+  GENERATE_BACKUP: 'true'
+  TRUSTZONE: 'false'
+  MERGE_STRATEGY: USER_ALL
+  DFPPath: SAMD21_DFP\3.6.144
