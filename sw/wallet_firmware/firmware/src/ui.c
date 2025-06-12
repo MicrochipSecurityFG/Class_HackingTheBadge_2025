@@ -120,10 +120,6 @@ void UI_CLI_IrPower(void) {
 
 }
 
-void UI_SaveWallet(void) {
-	//TODO
-}
-
 void UI_CLI_ResetLimit(void) {
 
     ATCA_STATUS status = ATCA_SUCCESS;
