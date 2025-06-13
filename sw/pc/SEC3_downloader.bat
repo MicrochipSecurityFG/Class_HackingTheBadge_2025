@@ -1,6 +1,9 @@
 @echo off
 setlocal EnableDelayedExpansion
 
+:: Set the entry point version (adjustable parameter)
+set "ENTRY_POINT_VERSION=entry_point_v0_9"
+
 :: Set the download location to C:\Backup\25072_SEC3 and create it if it doesn't exist
 set "DOWNLOAD_DIR=C:\Backup\25072_SEC3"
 if not exist "%DOWNLOAD_DIR%" mkdir "%DOWNLOAD_DIR%"
@@ -11,7 +14,7 @@ if exist "Class_HackingTheBadge_2025.zip" (
     echo Class_HackingTheBadge_2025.zip already exists, skipping download...
 ) else (
     echo Downloading Class_HackingTheBadge_2025...
-    curl -L -o Class_HackingTheBadge_2025.zip "https://github.com/MicrochipSecurityFG/Class_HackingTheBadge_2025/archive/refs/tags/entry_point_v0_9.zip"
+    curl -L -o Class_HackingTheBadge_2025.zip "https://github.com/MicrochipSecurityFG/Class_HackingTheBadge_2025/archive/refs/tags/!ENTRY_POINT_VERSION!.zip"
     if !errorlevel! neq 0 (
         echo Error: Failed to download Class_HackingTheBadge_2025.zip.
         goto :cleanup
@@ -52,7 +55,7 @@ if exist "Class_HackingTheBadge_2025.zip" (
 
     :: Copy the specific file 25072_SEC3_MASTERsPC_Restore.bat directly from the known path
     echo Copying 25072_SEC3_MASTERsPC_Restore.bat...
-    set "source_file=Class_HackingTheBadge_2025\Class_HackingTheBadge_2025-entry_point_v0_9\sw\pc\25072_SEC3_MASTERsPC_Restore.bat"
+    set "source_file=Class_HackingTheBadge_2025\Class_HackingTheBadge_2025-!ENTRY_POINT_VERSION!\sw\pc\25072_SEC3_MASTERsPC_Restore.bat"
     if exist "!source_file!" (
         copy "!source_file!" . || (
             echo Error: Failed to copy 25072_SEC3_MASTERsPC_Restore.bat.
