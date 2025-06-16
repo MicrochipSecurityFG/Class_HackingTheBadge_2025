@@ -2,7 +2,7 @@
 setlocal EnableDelayedExpansion
 
 :: Set the entry point version (adjustable parameter)
-set "ENTRY_POINT_VERSION=entry_point_v0_9"
+set "ENTRY_POINT_VERSION=entry_point_v0_11"
 
 :: Set the download location to C:\Backup\25072_SEC3 and create it if it doesn't exist
 set "DOWNLOAD_DIR=C:\Backup\25072_SEC3"

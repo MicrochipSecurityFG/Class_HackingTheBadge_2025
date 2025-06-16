@@ -149,12 +149,9 @@ CD "C:\MASTERs\25072_SEC3\sw\pc"
 CALL "python_venv_setup.bat"
 ECHO.
 
-REM Call it twice to overcome a startup bug
-CALL "python_venv_setup.bat"
-
 ECHO ========== Opening Programs ============
 ECHO.
-START "" "C:\Program Files\Adobe\Acrobat DC\Acrobat\Acrobat.exe" "C:\MASTERs\25072_SEC3\doc\LabManual.pdf"
-START "" "C:\Program Files (x86)\teraterm\ttermpro.exe" /F="C:\MASTERs\25072_SEC3\sw\pc\TERATERM.INI"
+REM START "" "C:\Program Files\Adobe\Acrobat DC\Acrobat\Acrobat.exe" "C:\MASTERs\25072_SEC3\doc\LabManual.pdf"
+START "" "C:\Program Files (x86)\teraterm5\ttermpro.exe" /F="C:\MASTERs\25072_SEC3\sw\pc\TERATERM.INI"
 START "" "C:\Program Files\Microchip\MPLABX\v6.25\mplab_platform\bin\mplab_ide64.exe" "C:\MASTERs\25072_SEC3\sw\wallet_firmware\firmware\wallet.X" --console new
 ECHO.

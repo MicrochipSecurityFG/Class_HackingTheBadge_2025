@@ -614,6 +614,7 @@ void derive_testnet_public_address(const uint8_t *private_key, uint8_t * address
 	 uint8_t digest[32];
 	 derive_testnet_public_key(private_key, compressedpubkey, NULL, NULL);
 	 derive_testnet_public_hash(compressedpubkey, digest);
+	 print_hex(digest, 32, "digest");
 	 derive_testnet_address(digest, address43);
 }
 
