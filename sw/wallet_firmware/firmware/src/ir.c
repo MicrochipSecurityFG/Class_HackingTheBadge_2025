@@ -36,6 +36,8 @@ uint32_t ir_power = 300;
 ir_packet_t ir_packet;
 extern rx_t rx;
 
+ReceiveHandler rxHandlerFunc;
+
 void IR_Receive(uintptr_t event) {
 
 
@@ -92,6 +94,7 @@ void IR_Receive(uintptr_t event) {
             if (ir_packet.data_index >= (ir_packet.length - 2)) {
                 ir_packet.state = RECEIVING_CRC;
             }
+
             break;
 
         case RECEIVING_CRC:
@@ -107,16 +110,20 @@ void IR_Receive(uintptr_t event) {
                     TC4_TimerStop();
                     TC4_Timer32bitCounterSet(0x0000);
                     ir_packet.valid_packet = true;
-                    //? SERCOM2_USART_ReceiverDisable();
+
                     ir_packet.buffer[ir_packet.data_index - 2] = 0x00;
                     resultsSubMenu[1].displayText = (char *)ir_packet.buffer;
-                    printf("IR: ");
+
+                    printf("IR:\n");
                     _ir_rx_disable();
+                    if(rxHandlerFunc != NULL) rxHandlerFunc(ir_packet.buffer, ir_packet.length);
+
                     for (int i = 0; i != ir_packet.length - 2; i++) {
                         printf("%c", ir_packet.buffer[i]);
                     }
                     _ir_rx_enable();
                     printf("\n");
+
                 } else {
                     ir_packet.state = WAITING_FOR_SYNC;
                     //printf("ng\n");
@@ -169,6 +176,12 @@ bool IR_SendMessage(const char *str, int8_t retry_count, const char *expected_re
         }
     }
     return false;
+}
+
+void IR_RegisterCallback(ReceiveHandler func) {
+    if (func != NULL) {
+    	rxHandlerFunc = func;
+    }
 }
 
 void IR_SendPacket(ir_packet_t * packet) {

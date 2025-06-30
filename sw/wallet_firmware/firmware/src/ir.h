@@ -18,7 +18,7 @@
 #ifndef _IR_H    /* Guard against multiple inclusion */
 #define _IR_H
 
-#define UART_RX_BUFFER_SIZE 350
+#define UART_RX_BUFFER_SIZE 255
 #include "config/default/definitions.h"
 
 
@@ -41,6 +41,9 @@ typedef struct {
     bool valid_packet;
 } ir_packet_t;
 
+typedef void (*ReceiveHandler)(char* buffer, uint16_t length);
+
+void IR_RegisterCallback(ReceiveHandler func);
 
 bool IR_SendMessage(const char *str, int8_t retry_count, const char *expected_response);
 void IR_Send(uint8_t byte);
@@ -54,7 +57,6 @@ void IR_FlushReceiver(void);
 #define AES_BLOCK_SIZE 16
 #define LINE_FEED 0x0a
 
-// Step Password 3.4.1
 typedef struct rx {
     uint8_t receivedCount;
     uint8_t receiveBuffer[128];

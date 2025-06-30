@@ -5,6 +5,7 @@ from Crypto.Util.Padding import unpad
 import serial
 import serial.tools.list_ports
 import time
+import sys
 
 def read_bip39_wordlist(file_path):
     try:
@@ -12,13 +13,13 @@ def read_bip39_wordlist(file_path):
             return [word.strip() for word in f.readlines() if word.strip()]
     except FileNotFoundError:
         print(f"Error: BIP39 wordlist file '{file_path}' not found")
-        exit(1)
+        sys.exit(1)
 
 def get_serial_port():
     ports = serial.tools.list_ports.comports()
     if not ports:
         print("Error: No serial ports found")
-        exit(1)
+        sys.exit(1)
     print("Available serial ports:")
     for port in ports:
         print(f"- {port.device}: {port.description}")
@@ -52,13 +53,30 @@ def get_ciphertext_from_serial(port, baudrate=115200, incorrect_pin="123"):
             print("Full serial response:")
             for r in response:
                 print(f"> {r}")
-            exit(1)
+            sys.exit(1)
     except serial.SerialException as e:
         print(f"Serial error: {e}")
-        exit(1)
+        sys.exit(1)
+
+def get_ciphertext_from_file(file_path):
+    try:
+        with open(file_path, 'r') as f:
+            hex_string = f.read().strip().replace('\n', '')
+            if not all(c in '0123456789abcdefABCDEF' for c in hex_string):
+                print("Error: File does not contain valid hex characters")
+                sys.exit(1)
+            cipher_bytes = bytes.fromhex(hex_string)
+            print(f"Read ciphertext from file ({len(cipher_bytes)} bytes):")
+            print(cipher_bytes.hex())
+            return cipher_bytes
+    except FileNotFoundError:
+        print(f"Error: Encrypted data file '{file_path}' not found")
+        sys.exit(1)
+    except ValueError:
+        print("Error: Could not parse hex data in file")
+        sys.exit(1)
 
 def compute_key(pin_bytes, timer_bytes):
-    """Compute AES key from PIN and timestamp bytes."""
     data = pin_bytes + timer_bytes
     sha256_hash = hashlib.sha256(data).digest()
     return sha256_hash[:16]
@@ -67,24 +85,33 @@ def main():
     parser = argparse.ArgumentParser(description='Decrypt BIP39 ciphertext')
     parser.add_argument('--pin', required=True, help='PIN (ASCII string)')
 
+    # Add mutually exclusive group for input source
+    input_group = parser.add_mutually_exclusive_group(required=True)
+    input_group.add_argument('--serial', action='store_true', help='Read ciphertext over serial port')
+    input_group.add_argument('--file', help='Path to file containing hex ciphertext')
+
     args = parser.parse_args()
 
     try:
         pin_bytes = args.pin.encode('ascii')
-        
     except (ValueError, UnicodeEncodeError) as e:
         print(f"Error: {e}")
-        exit(1)
+        sys.exit(1)
 
     if len(pin_bytes) < 1:
         print("Error: PIN cannot be empty")
-        exit(1)
+        sys.exit(1)
+
     print(f"PIN length: {len(pin_bytes)} bytes")
     print(f"PIN bytes: {pin_bytes.hex().upper()}")
 
     bip39_wordlist = read_bip39_wordlist('bip39_wordlist.txt')
-    serial_port = get_serial_port()
-    cipher_text = get_ciphertext_from_serial(serial_port)
+
+    if args.serial:
+        serial_port = get_serial_port()
+        cipher_text = get_ciphertext_from_serial(serial_port)
+    else:
+        cipher_text = get_ciphertext_from_file(args.file)
 
     for i in range(0x000000, 0x1000000):
         if i % 0x10000 == 0:
@@ -101,10 +128,8 @@ def main():
             if len(matched_words) >= 4:
                 print(f"[MATCH] Timer: {timer_bytes.hex().upper()} -> Key: {key_16_bytes.hex().upper()}")
                 print(f"Full decrypted text:\n{decrypted_text}\n")
-                
-                break;
-            
-        except ValueError as e:
+                break
+        except ValueError:
             continue
 
     print("DONE")

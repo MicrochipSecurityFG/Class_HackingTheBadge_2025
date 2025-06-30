@@ -1,0 +1,507 @@
+configVersion: 1.0.0
+componentName: le_gfx_driver_external
+coreVersion: 5.8.2
+device: ATSAMD21J18A
+library: []
+dependency:
+- dependencyPackage: class com.microchip.mcc.harmony.HarmonyModule
+  name: le_gfx_driver_external
+  type: module
+  version: ''
+- dependencyPackage: ''
+  name: gfx
+  type: package
+  version: v3.16.0
+customDataClassName: com.microchip.utils_mh3.utils.persistence.CustomModuleData
+data:
+  attachments:
+    children:
+    - children:
+      - attributes:
+          id: Parallel Display Interface
+        children:
+        - children:
+          - attributes:
+              id: enabled
+            children:
+            - type: Value
+              value: 'false'
+            type: Boolean
+          type: Attributes
+        type: DirectDependency
+      - attributes:
+          id: SPI Display Interface
+        children:
+        - children:
+          - attributes:
+              id: targetComponentID
+            children:
+            - type: Value
+              value: le_gfx_intf_spi4
+            type: String
+          - attributes:
+              id: targetAttachmentID
+            children:
+            - type: Value
+              value: le_gfx_intf_spi4
+            type: String
+          - attributes:
+              id: enabled
+            children:
+            - type: Value
+              value: 'true'
+            type: Boolean
+          type: Attributes
+        type: DirectDependency
+      - attributes:
+          id: gfx_driver_external
+        children:
+        - children:
+          - attributes:
+              id: targetComponentID
+            children:
+            - type: Value
+              value: gfx_legato
+            type: String
+          - attributes:
+              id: targetAttachmentID
+            children:
+            - type: Value
+              value: gfx_driver
+            type: String
+          type: Attributes
+        type: DirectCapability
+      type: Attachments
+    type: le_gfx_driver_external
+  elementPosition:
+    attributes:
+      id: __ROOTVIEW
+    children:
+    - children:
+      - attributes:
+          id: le_gfx_driver_external
+          x: '901'
+          y: '195'
+        type: ElementPosition
+      type: ElementPositions
+    type: ComponentGraph
+  symbols:
+    Command0:
+      attributes:
+        id: Command0
+      children:
+      - children:
+        - attributes:
+            value: '1'
+          type: User
+        type: Values
+      type: Hex
+    Command0Comment:
+      attributes:
+        id: Command0Comment
+      children:
+      - children:
+        - attributes:
+            value: sw reset
+          type: User
+        type: Values
+      type: String
+    Command0Delay:
+      attributes:
+        id: Command0Delay
+      children:
+      - children:
+        - attributes:
+            value: '150'
+          type: User
+        type: Values
+      type: Integer
+    Command0ParmsCount:
+      attributes:
+        id: Command0ParmsCount
+      children:
+      - children:
+        - attributes:
+            value: '0'
+          type: User
+        type: Values
+      type: Integer
+    Command1:
+      attributes:
+        id: Command1
+      children:
+      - children:
+        - attributes:
+            value: '17'
+          type: User
+        type: Values
+      type: Hex
+    Command1Comment:
+      attributes:
+        id: Command1Comment
+      children:
+      - children:
+        - attributes:
+            value: sleep mode off
+          type: User
+        type: Values
+      type: String
+    Command1Delay:
+      attributes:
+        id: Command1Delay
+      children:
+      - children:
+        - attributes:
+            value: '120'
+          type: User
+        type: Values
+      type: Integer
+    Command2:
+      attributes:
+        id: Command2
+      children:
+      - children:
+        - attributes:
+            value: '58'
+          type: User
+        type: Values
+      type: Hex
+    Command2Comment:
+      attributes:
+        id: Command2Comment
+      children:
+      - children:
+        - attributes:
+            value: color mode
+          type: User
+        type: Values
+      type: String
+    Command2Delay:
+      attributes:
+        id: Command2Delay
+      children:
+      - children:
+        - attributes:
+            value: '10'
+          type: User
+        type: Values
+      type: Integer
+    Command2Parm0:
+      attributes:
+        id: Command2Parm0
+      children:
+      - children:
+        - attributes:
+            id: visible
+          children:
+          - type: Value
+            value: 'true'
+          type: Boolean
+        type: Attributes
+      - children:
+        - attributes:
+            value: '5'
+          type: User
+        type: Values
+      type: Hex
+    Command2ParmsCount:
+      attributes:
+        id: Command2ParmsCount
+      children:
+      - children:
+        - attributes:
+            value: '1'
+          type: User
+        type: Values
+      type: Integer
+    Command3:
+      attributes:
+        id: Command3
+      children:
+      - children:
+        - attributes:
+            id: visible
+          children:
+          - type: Value
+            value: 'true'
+          type: Boolean
+        type: Attributes
+      - children:
+        - attributes:
+            value: '32'
+          type: User
+        type: Values
+      type: Hex
+    Command3Comment:
+      attributes:
+        id: Command3Comment
+      children:
+      - children:
+        - attributes:
+            value: Display inversion off
+          type: User
+        type: Values
+      type: String
+    Command3Delay:
+      attributes:
+        id: Command3Delay
+      children:
+      - children:
+        - attributes:
+            value: '10'
+          type: User
+        type: Values
+      type: Integer
+    Command4:
+      attributes:
+        id: Command4
+      children:
+      - children:
+        - attributes:
+            id: visible
+          children:
+          - type: Value
+            value: 'true'
+          type: Boolean
+        type: Attributes
+      - children:
+        - attributes:
+            value: '54'
+          type: User
+        type: Values
+      type: Hex
+    Command4Comment:
+      attributes:
+        id: Command4Comment
+      children:
+      - children:
+        - attributes:
+            value: Memory Data Access Control
+          type: User
+        type: Values
+      type: String
+    Command4Delay:
+      attributes:
+        id: Command4Delay
+      children:
+      - children:
+        - attributes:
+            value: '10'
+          type: User
+        type: Values
+      type: Integer
+    Command4Parm0:
+      attributes:
+        id: Command4Parm0
+      children:
+      - children:
+        - attributes:
+            id: visible
+          children:
+          - type: Value
+            value: 'true'
+          type: Boolean
+        type: Attributes
+      - children:
+        - attributes:
+            value: '120'
+          type: User
+        type: Values
+      type: Hex
+    Command4ParmsCount:
+      attributes:
+        id: Command4ParmsCount
+      children:
+      - children:
+        - attributes:
+            value: '1'
+          type: User
+        type: Values
+      type: Integer
+    Command5:
+      attributes:
+        id: Command5
+      children:
+      - children:
+        - attributes:
+            id: visible
+          children:
+          - type: Value
+            value: 'true'
+          type: Boolean
+        type: Attributes
+      - children:
+        - attributes:
+            value: '41'
+          type: User
+        type: Values
+      type: Hex
+    Command5Comment:
+      attributes:
+        id: Command5Comment
+      children:
+      - children:
+        - attributes:
+            value: Display on
+          type: User
+        type: Values
+      type: String
+    Command5Delay:
+      attributes:
+        id: Command5Delay
+      children:
+      - children:
+        - attributes:
+            value: '100'
+          type: User
+        type: Values
+      type: Integer
+    ControllerName:
+      attributes:
+        id: ControllerName
+      children:
+      - children:
+        - attributes:
+            value: ST7735S
+          type: User
+        type: Values
+      type: String
+    DataWriteSize:
+      attributes:
+        id: DataWriteSize
+      children:
+      - children:
+        - attributes:
+            value: '8'
+          type: User
+        type: Values
+      type: Combo
+    DisplayHeight:
+      attributes:
+        id: DisplayHeight
+      children:
+      - children:
+        - attributes:
+            id: le_gfx_driver_external
+            value: '272'
+          type: Dynamic
+        - attributes:
+            value: '80'
+          type: User
+        type: Values
+      type: Integer
+    DisplayInterfaceType:
+      attributes:
+        id: DisplayInterfaceType
+      children:
+      - children:
+        - attributes:
+            value: SPI 4-line
+          type: User
+        type: Values
+      type: Combo
+    DisplayWidth:
+      attributes:
+        id: DisplayWidth
+      children:
+      - children:
+        - attributes:
+            id: le_gfx_driver_external
+            value: '480'
+          type: Dynamic
+        - attributes:
+            value: '160'
+          type: User
+        type: Values
+      type: Integer
+    InitCommandsCount:
+      attributes:
+        id: InitCommandsCount
+      children:
+      - children:
+        - attributes:
+            value: '6'
+          type: User
+        type: Values
+      type: Integer
+    MemoryWriteCommand:
+      attributes:
+        id: MemoryWriteCommand
+      children:
+      - children:
+        - attributes:
+            value: '44'
+          type: User
+        type: Values
+      type: Hex
+    PostResetDelay:
+      attributes:
+        id: PostResetDelay
+      children:
+      - children:
+        - attributes:
+            value: '120'
+          type: User
+        type: Values
+      type: Integer
+    PreResetDelay:
+      attributes:
+        id: PreResetDelay
+      children:
+      - children:
+        - attributes:
+            value: '100'
+          type: User
+        type: Values
+      type: Integer
+    ResetAssertDuration:
+      attributes:
+        id: ResetAssertDuration
+      children:
+      - children:
+        - attributes:
+            value: '1'
+          type: User
+        type: Values
+      type: Integer
+    SetXAddressCommand:
+      attributes:
+        id: SetXAddressCommand
+      children:
+      - children:
+        - attributes:
+            value: '42'
+          type: User
+        type: Values
+      type: Hex
+    SetYAddressCommand:
+      attributes:
+        id: SetYAddressCommand
+      children:
+      - children:
+        - attributes:
+            value: '43'
+          type: User
+        type: Values
+      type: Hex
+    XAddressOffset:
+      attributes:
+        id: XAddressOffset
+      children:
+      - children:
+        - attributes:
+            value: '0'
+          type: User
+        type: Values
+      type: Integer
+    YAddressOffset:
+      attributes:
+        id: YAddressOffset
+      children:
+      - children:
+        - attributes:
+            value: '24'
+          type: User
+        type: Values
+      type: Integer
+  userData: {}

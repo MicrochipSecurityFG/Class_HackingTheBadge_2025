@@ -83,10 +83,10 @@ void TC4_TimerInitialize( void )
     }
 
     /* Configure counter mode & prescaler */
-    TC4_REGS->COUNT32.TC_CTRLA = TC_CTRLA_MODE_COUNT32 | TC_CTRLA_PRESCALER_DIV1 | TC_CTRLA_WAVEGEN_MPWM ;
+    TC4_REGS->COUNT32.TC_CTRLA = TC_CTRLA_MODE_COUNT32 | TC_CTRLA_PRESCALER_DIV8 | TC_CTRLA_WAVEGEN_MPWM ;
 
     /* Configure timer period */
-    TC4_REGS->COUNT32.TC_CC[0U] = 374999U;
+    TC4_REGS->COUNT32.TC_CC[0U] = 46874U;
 
     /* Clear all interrupt flags */
     TC4_REGS->COUNT32.TC_INTFLAG = TC_INTFLAG_Msk;
@@ -121,7 +121,7 @@ void TC4_TimerStop( void )
 
 uint32_t TC4_TimerFrequencyGet( void )
 {
-    return (uint32_t)(250000UL);
+    return (uint32_t)(31250UL);
 }
 
 void TC4_TimerCommandSet(TC_COMMAND command)

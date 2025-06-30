@@ -464,8 +464,43 @@
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
                    projectFiles="true">
+      <logicalFolder name="wallet_default"
+                     displayName="wallet_default"
+                     projectFiles="true">
+        <logicalFolder name="components" displayName="components" projectFiles="true">
+          <itemPath>wallet_default/components/sercom0.yml</itemPath>
+          <itemPath>wallet_default/components/cryptoauthlib.yml</itemPath>
+          <itemPath>wallet_default/components/sercom5.yml</itemPath>
+          <itemPath>wallet_default/components/tc3.yml</itemPath>
+          <itemPath>wallet_default/components/sercom3.yml</itemPath>
+          <itemPath>wallet_default/components/HarmonyCore.yml</itemPath>
+          <itemPath>wallet_default/components/drv_spi.yml</itemPath>
+          <itemPath>wallet_default/components/atecc608_0.yml</itemPath>
+          <itemPath>wallet_default/components/drv_spi_0.yml</itemPath>
+          <itemPath>wallet_default/components/sercom2.yml</itemPath>
+          <itemPath>wallet_default/components/stdio.yml</itemPath>
+          <itemPath>wallet_default/components/dfp.yml</itemPath>
+          <itemPath>wallet_default/components/gfx_legato.yml</itemPath>
+          <itemPath>wallet_default/components/gfx_hal_le.yml</itemPath>
+          <itemPath>wallet_default/components/eic.yml</itemPath>
+          <itemPath>wallet_default/components/le_gfx_intf_spi4.yml</itemPath>
+          <itemPath>wallet_default/components/sys_time.yml</itemPath>
+          <itemPath>wallet_default/components/evsys.yml</itemPath>
+          <itemPath>wallet_default/components/le_gfx_driver_external.yml</itemPath>
+          <itemPath>wallet_default/components/core.yml</itemPath>
+          <itemPath>wallet_default/components/tcc2.yml</itemPath>
+          <itemPath>wallet_default/components/cmsis.yml</itemPath>
+          <itemPath>wallet_default/components/tc4.yml</itemPath>
+          <itemPath>wallet_default/components/atecc608.yml</itemPath>
+          <itemPath>wallet_default/components/nvmctrl.yml</itemPath>
+        </logicalFolder>
+        <itemPath>wallet_default/mcc-config.mc4</itemPath>
+      </logicalFolder>
       <itemPath>Makefile</itemPath>
-      <itemPath>wallet.mc3</itemPath>
+    </logicalFolder>
+    <logicalFolder name="LibraryFiles"
+                   displayName="LibraryFiles"
+                   projectFiles="true">
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -960,8 +995,8 @@
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="SAMD21_DFP" vendor="Microchip" version="3.6.144"/>
         <pack name="CMSIS" vendor="ARM" version="5.8.0"/>
+        <pack name="SAMD21_DFP" vendor="Microchip" version="3.6.144"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>

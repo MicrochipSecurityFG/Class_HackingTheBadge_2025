@@ -513,7 +513,7 @@ void __attribute__((used)) SERCOM3_SPI_InterruptHandler(void)
         }
 
         /* If there are more words to be transmitted, then transmit them here and keep track of the count */
-        if((SERCOM3_REGS->SPIM.SERCOM_INTFLAG & SERCOM_SPIM_INTFLAG_DRE_Msk) == SERCOM_SPIM_INTFLAG_DRE_Msk)
+         if((SERCOM3_REGS->SPIM.SERCOM_INTFLAG & SERCOM_SPIM_INTFLAG_DRE_Msk) == SERCOM_SPIM_INTFLAG_DRE_Msk)
         {
             /* Disable the DRE interrupt. This will be enabled back if more than
              * one byte is pending to be transmitted */

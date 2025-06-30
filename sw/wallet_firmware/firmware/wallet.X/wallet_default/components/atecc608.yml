@@ -1,0 +1,31 @@
+configVersion: 1.0.0
+componentName: atecc608
+coreVersion: 5.8.2
+device: ATSAMD21J18A
+library: []
+dependency:
+- dependencyPackage: class com.microchip.mcc.harmony.HarmonyModule
+  name: atecc608
+  type: module
+  version: ''
+- dependencyPackage: ''
+  name: cryptoauthlib
+  type: package
+  version: '20240308'
+customDataClassName: com.microchip.utils_mh3.utils.persistence.CustomModuleData
+data:
+  attachments: {}
+  elementPosition:
+    attributes:
+      id: __ROOTVIEW
+    children:
+    - children:
+      - attributes:
+          id: atecc608
+          x: '350'
+          y: '165'
+        type: ElementPosition
+      type: ElementPositions
+    type: ComponentGraph
+  symbols: {}
+  userData: {}

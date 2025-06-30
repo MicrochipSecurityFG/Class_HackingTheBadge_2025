@@ -126,6 +126,50 @@ void MULTI_COMM_Print(const char *str, bool outputSerial) {
     }
 }
 
+void MULTI_COMM_Print_Hex(uint8_t *bytes, size_t length, bool outputSerial) {
+    const size_t MAX_PACKET_DATA = 252;        // max IR packet buffer payload
+    const size_t MAX_INPUT_CHUNK = MAX_PACKET_DATA / 2;  // because of hex encoding
+
+    size_t offset = 0;
+    while (offset < length) {
+        size_t chunk_len = (length - offset > MAX_INPUT_CHUNK) ? MAX_INPUT_CHUNK : (length - offset);
+
+        // Build hex string for this chunk
+        char hex_str[MAX_PACKET_DATA + 1];  // 2*chunk_len at most
+        for (size_t i = 0; i < chunk_len; i++) {
+            sprintf(&hex_str[i * 2], "%02x", bytes[offset + i]);
+        }
+        hex_str[chunk_len * 2] = '\0';
+
+        // Prepare IR packet
+        ir_packet.info_byte = 0x00;
+        memset(ir_packet.buffer, 0x00, sizeof(ir_packet.buffer));
+        memcpy(ir_packet.buffer, hex_str, chunk_len * 2);
+        ir_packet.data_index = chunk_len * 2;
+        ir_packet.length = ir_packet.data_index + 3;
+        ir_packet.crc = UTIL_crc16_CCITT(ir_packet.buffer, ir_packet.data_index);
+        ir_packet.buffer[ir_packet.data_index++] = (uint8_t)(ir_packet.crc >> 8);
+        ir_packet.buffer[ir_packet.data_index++] = (uint8_t)(ir_packet.crc);
+
+        IR_SendPacket(&ir_packet);
+
+        // Optional serial output
+        if (outputSerial) {
+            for (size_t i = 0; i < chunk_len; i++) {
+                printf("%02x", bytes[offset + i]);
+            }
+        }
+
+        offset += chunk_len;
+    }
+
+    if (outputSerial) {
+        printf("\n");
+    }
+}
+
+
+
 /* *****************************************************************************
  End of File
  */

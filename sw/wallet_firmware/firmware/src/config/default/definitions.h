@@ -51,8 +51,8 @@
 #include <stdio.h>
 #include "peripheral/nvmctrl/plib_nvmctrl.h"
 #include "peripheral/tc/plib_tc3.h"
-#include "system/time/sys_time.h"
 #include "peripheral/tc/plib_tc4.h"
+#include "system/time/sys_time.h"
 #include "driver/spi/drv_spi.h"
 #include "system/int/sys_int.h"
 #include "system/ports/sys_ports.h"

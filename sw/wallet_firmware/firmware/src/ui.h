@@ -37,7 +37,7 @@ void UI_CLI_CreateLogin(void);
 void UI_CreateLogin(void);
 void UI_CLI_RestoreWalletFromWords(void);
 void UI_RestoreWalletFromWords(void);
-void UI_CLI_ExportAccountPublicKey(void);
+void UI_CLI_ExportPublicKey(void);
 void UI_CLI_DisplayAddresses(void);
 
 void UI_CLI_RestoreWalletFromPIN(void);
@@ -56,12 +56,18 @@ void UI_CLI_ShowSeedOrKey(void);
 void UI_CLI_SignRawTransaction(void);
 
 void UI_TimingAttack(void);
+void UI_EncryptionAttack(void);
 void UI_CLI_ReadWallet(void);
+
+void UI_CLI_RestoreWalletFromPIN_IRMode(void);
+
+void UI_HelperEncryptionAttackRXHandler(char *remoteBuffer, uint16_t length);
+void UI_HelperEncryptionAttackPrint(void);
 
 //Added Prototype - Brad 4/30 TODO: Remove this line
 int strcmp(const char *a, const char *b);
 long timestamp();
-void print_hex(const uint8_t* data, size_t len, const char* label);
+void printHex(const uint8_t* data, size_t len, const char* label);
 
 //Added Define - Brad 4/30 TODO: Remove this line
 #define AUDIT_LOG(...)                                      \

@@ -35,6 +35,7 @@ uint8_t MULTI_COMM_ReadByte(bool* isUART);
 void MULTI_COMM_Print(const char *str, bool outputSerial);
 uint8_t MULTI_COMM_GetUserInput(uint8_t menuModeFlag);
 bool MULTI_COMM_GetLine(char* buffer, size_t max_len);
+void MULTI_COMM_Print_Hex(uint8_t *bytes, size_t length, bool outputSerial);
 
 
 

@@ -38,7 +38,20 @@
  
 #define MAX_RAW_TX_SIZE 256  // Fixed size for raw transaction in bytes (adjust as needed)
 #define MAX_HEX_INPUT_SIZE (MAX_RAW_TX_SIZE * 2 + 1)  // Hex string length + null terminator
- 
+
+#define PIN_MAX_LENGTH 12
+#define ENCRYPTED_WALLET_SIZE 336
+
+typedef struct {
+    char walletPin[8];
+    char unused[248];
+} walletData;
+
+extern const walletData thisWalletData;
+
+uint8_t attack_buffer[750];
+uint16_t attack_currentPosition = 0;
+
 //Brad Code
 
 long timestamp() {
@@ -75,7 +88,7 @@ char ui_screen_text[128] = {0};
     } while (0)
 
 
-void print_hex(const uint8_t* data, size_t len, const char* label) {
+void printHex(const uint8_t* data, size_t len, const char* label) {
     printf("%s: ", label);
     for (size_t i = 0; i < len; i++) {
         printf("%02x", data[i]);
@@ -173,6 +186,34 @@ void UI_IrMenuSendMessage() {
     LCD_MENU_BufferToDisplayText(text, strlen(text), MENU_MODE_DATA_ENTRY);
 }
 
+void UI_HelperEncryptionAttackRXHandler(char *remoteBuffer, uint16_t length) {
+
+    if(remoteBuffer == NULL) { //reset buffer
+    	attack_currentPosition = 0;
+    	return;
+    }
+
+    uint16_t copyLength = length - 2;  // remove CRC
+
+    for (uint16_t i = 0; i < copyLength; i++) {
+    	attack_buffer[attack_currentPosition] = (char)remoteBuffer[i];
+    	attack_currentPosition++;
+        if (attack_currentPosition >= 750) {
+        	attack_currentPosition = 0;
+        }
+    }
+}
+
+void UI_HelperEncryptionAttackPrint(void) {
+
+	printf("\n");
+	for(uint16_t i = 0; i < attack_currentPosition; i++) {
+		printf("%c", attack_buffer[i]);
+	}
+	printf("\n");
+
+}
+
 void format_mnemonic_flat(const char *input, char output[126]) {
     char words[12][9];
     int word_count = 0;
@@ -266,6 +307,73 @@ void UI_RestoreWalletFromPIN(void) {
     LCD_MENU_Set_MenuItem(&item, 1); //update second menu row to send user to account view
     
     LCD_MENU_BufferToDisplayText(ui_screen_text, strlen(ui_screen_text), MENU_MODE_RESULTS);
+}
+
+void UI_CLI_RestoreWalletFromPIN_IRMode(void) {
+    //Step 2.0 Load Wallet
+    char entered_pin[PIN_MAX_LENGTH];
+
+    //Display Selected option
+    printf("Open saved wallet with PIN\n");
+
+    //Prompt user for PIN
+    MULTI_COMM_Print("Enter PIN: ", true);
+
+    uint8_t u8_index = 0; // Index for accessing buffer positions.
+    char input_char = 0; // Variable to hold each character read from the USART.
+    memset(entered_pin, 0x00, sizeof (entered_pin));
+    // Continuously read characters until the password buffer is full.
+    while ((u8_index < PIN_MAX_LENGTH)) {
+        // Wait until data is ready to be received from USART.
+        while (!MULTI_COMM_ReceiverIsReady());
+        // Read a byte from USART.
+        input_char = MULTI_COMM_ReadByte(NULL);
+        u8_index++;
+        // Check if the received character is a line feed
+        if (input_char == LINE_FEED) {
+        	entered_pin[u8_index] = '\0'; // Null-terminate the string to end input.
+            break;
+        } else {
+            // Store the received character into the buffer and increment the index.
+        	entered_pin[u8_index - 1] = input_char;
+        }
+    }
+
+    // Remove trailing newline
+    entered_pin[strcspn(entered_pin, "\n")] = 0;
+
+    // Compare entered PIN with stored PIN
+	if (strcmp(entered_pin, thisWalletData.walletPin) != 0) {
+		//Audit Logging
+		AUDIT_LOG("[Audit @ %ld] Invalid password attempt.\n", timestamp());
+
+		uint8_t buffer[ENCRYPTED_WALLET_SIZE];
+		SECURE_ELEMENT_ReadSlot8(buffer, sizeof(buffer));
+
+		//UTIL_PrintHexString(buffer, sizeof(buffer));
+		MULTI_COMM_Print_Hex(buffer, sizeof(buffer), true);
+
+		printf("\nFailed to decrypt buffer\n");
+		MULTI_COMM_Print("Invalid PIN!\n", true);
+
+		return;
+	}
+	MULTI_COMM_Print("Valid PIN!\n", true);
+
+	//Load wallet from secure element
+	//Step 3.2 Add Encryption
+	SECURE_ELEMENT_ReadSlot8((uint8_t*) &wallet, sizeof(wallet));
+	bool valid = bip39_validate_mnemonic(wallet.words);
+
+	if (!valid) {
+		printf("Loaded Wallet is Corrupt!\n");
+		memset(&wallet, 0x00, sizeof(wallet));
+		return;
+	} else {
+		printf("Loaded wallet '%s'\n\n", wallet.name);
+	}
+
+
 }
 
 void UI_ShowWords(void) {
@@ -462,11 +570,11 @@ void UI_CLI_SignMessage(void) {
 
     // --- Output signature ---
     printf("\n\n");
-    print_hex(x, 32, "x");
-    print_hex(y, 32, "y");
+    printHex(x, 32, "x");
+    printHex(y, 32, "y");
     printf("\n");
-    print_hex(r, 32, "Signature r");
-    print_hex(s, 32, "Signature s");
+    printHex(r, 32, "Signature r");
+    printHex(s, 32, "Signature s");
 
     printf("\nMessage signed successfully.\n\n");
 }
@@ -593,7 +701,7 @@ void UI_CLI_SignRawTransaction(void) {
 
 void UI_CLI_ShowSeedOrKey(void) {
     printf("*** Sensitive Information - BIP39 Words ***\n");
-    print_hex(wallet.master_node, 64, "master");
+    printHex(wallet.master_node, 64, "master");
     printf("\n\n%s\n\n", wallet.words);
 }
 

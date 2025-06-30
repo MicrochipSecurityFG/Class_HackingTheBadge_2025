@@ -68,6 +68,7 @@ MenuItem mainMenu[] = {
     {"Load Wallet", UI_RestoreWalletFromWords, resultsSubMenu, 2, (leFont*) & Font0},
     {"Load Saved", UI_RestoreWalletFromPIN, resultsSubMenu, 2, (leFont*) & Font0},
 	{"Timing Attack", UI_TimingAttack, resultsSubMenu, 3, (leFont*) & Font0},
+	{"Encryption Attack", UI_EncryptionAttack, resultsSubMenu, 3, (leFont*) & Font0},
 };
 
 MenuItem accountMenu[] = {
@@ -79,7 +80,7 @@ MenuItem accountMenu[] = {
     {"Sign Message",    NULL, NULL, 3, (leFont*) & Font0},
     {"Verify Message",  NULL, NULL, 3, (leFont*) & Font0},
     {"empty",           NULL, NULL, 3, (leFont*) & Font0},
-    {"Exit Account",    NULL, NULL, 3, (leFont*) & Font0},
+    {"Exit Wallet",    NULL, NULL, 3, (leFont*) & Font0},
 };
 
 DataEntryExitFunc exitFunc;
