@@ -116,7 +116,7 @@ void IR_Receive(uintptr_t event) {
 
                     printf("IR:\n");
                     _ir_rx_disable();
-                    if(rxHandlerFunc != NULL) rxHandlerFunc((char*)ir_packet.buffer, (uint16_t)ir_packet.length);
+                    if(rxHandlerFunc != NULL) rxHandlerFunc(ir_packet.buffer, ir_packet.length);
 
                     for (int i = 0; i != ir_packet.length - 2; i++) {
                         printf("%c", ir_packet.buffer[i]);

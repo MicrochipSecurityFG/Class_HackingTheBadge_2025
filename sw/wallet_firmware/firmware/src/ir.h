@@ -18,7 +18,7 @@
 #ifndef _IR_H    /* Guard against multiple inclusion */
 #define _IR_H
 
-#define UART_RX_BUFFER_SIZE 255
+#define UART_RX_BUFFER_SIZE 350
 #include "config/default/definitions.h"
 
 
