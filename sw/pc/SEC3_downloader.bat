@@ -25,7 +25,7 @@ if exist "ghidra_11.3.2_PUBLIC_20250415.zip" (
     echo ghidra_11.3.2_PUBLIC_20250415.zip already exists, skipping download...
 ) else (
     echo Downloading Ghidra...
-    curl -L -o ghidra_11.3.2_PUBLIC_20250415.zip "https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_11.3.2_build/ghidra_11.3.2_PUBLIC_20250415.zip"
+    curl --ssl-no-revoke -L -o ghidra_11.3.2_PUBLIC_20250415.zip "https://github.com/NationalSecurityAgency/ghidra/releases/download/Ghidra_11.3.2_build/ghidra_11.3.2_PUBLIC_20250415.zip"
     if !errorlevel! neq 0 (
         echo Error: Failed to download ghidra_11.3.2_PUBLIC_20250415.zip.
         goto :cleanup
