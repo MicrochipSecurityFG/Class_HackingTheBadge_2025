@@ -41,7 +41,7 @@ generatedFileHashHistoryMap:
 - file: ..\src\config\default\configuration.h
   hash: 15e672705cd8f03a7c4451b664079855f5002c361a64bc4efd0c82e7bfbfb97c
 - file: ..\src\config\default\definitions.h
-  hash: 83094e316f023282636b62302f046536143bc13a59de28f52da9e6ce31d3726e
+  hash: cf8e1e24cb0ba679580ac2eb8274433010f202b3eabbd90e1bdf458d05452d71
 - file: ..\src\config\default\device.h
   hash: 3c978311bac2e13b73a420a163facffbb69f51584572acc349c1c3d167c23409
 - file: ..\src\config\default\device_cache.h
@@ -571,7 +571,7 @@ generatedFileHashHistoryMap:
 - file: ..\src\config\default\gfx\legato\widget\window\legato_widget_window_skin_classic.c
   hash: dd6b3e7c710431206685fc51459a31358dae4e99be8dd14849be4fe858ba4cc8
 - file: ..\src\config\default\initialization.c
-  hash: c701ae3507c7a37e41dedf0352ec28726075b655677eada9dc12d696cdc12c26
+  hash: 1db7c9ce6d636e4874219f6351eb444e93328ea0a224313b6adacd925b184f17
 - file: ..\src\config\default\interrupts.c
   hash: 41a606c99db325153ab991c940ef7957bcbe39a98135fb982e68be3d38f7f0ed
 - file: ..\src\config\default\interrupts.h

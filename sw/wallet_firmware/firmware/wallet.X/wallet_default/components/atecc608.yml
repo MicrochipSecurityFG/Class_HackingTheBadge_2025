@@ -22,8 +22,8 @@ data:
     - children:
       - attributes:
           id: atecc608
-          x: '350'
-          y: '165'
+          x: '342'
+          y: '164'
         type: ElementPosition
       type: ElementPositions
     type: ComponentGraph
