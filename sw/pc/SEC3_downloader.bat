@@ -9,16 +9,11 @@ set "DOWNLOAD_DIR=C:\Backup\25072_SEC3"
 if not exist "%DOWNLOAD_DIR%" mkdir "%DOWNLOAD_DIR%"
 cd /d "%DOWNLOAD_DIR%"
 
-:: Download the files using curl, but only if they don't already exist
-if exist "Class_HackingTheBadge_2025.zip" (
-    echo Class_HackingTheBadge_2025.zip already exists, skipping download...
-) else (
-    echo Downloading Class_HackingTheBadge_2025...
-    curl -L -o Class_HackingTheBadge_2025.zip "https://github.com/MicrochipSecurityFG/Class_HackingTheBadge_2025/archive/refs/tags/!ENTRY_POINT_VERSION!.zip"
-    if !errorlevel! neq 0 (
-        echo Error: Failed to download Class_HackingTheBadge_2025.zip.
-        goto :cleanup
-    )
+echo Downloading Class_HackingTheBadge_2025...
+curl -L -o Class_HackingTheBadge_2025.zip "https://github.com/MicrochipSecurityFG/Class_HackingTheBadge_2025/archive/refs/tags/!ENTRY_POINT_VERSION!.zip"
+if !errorlevel! neq 0 (
+    echo Error: Failed to download Class_HackingTheBadge_2025.zip.
+    goto :cleanup
 )
 
 if exist "ghidra_11.3.2_PUBLIC_20250415.zip" (
