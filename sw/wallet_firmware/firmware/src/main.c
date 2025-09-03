@@ -92,9 +92,24 @@ static inline uint32_t SysTickDiffToUs(uint32_t start, uint32_t end) {
 
 void SECURE_ELEMENT_GetRandom(uint8_t * random) { 
     //Step Random 4
-    ATCA_STATUS status;
-    status = atcab_random(random);
-    CHECK_STATUS(status);
+	ATCADevice atcab_device = {0};
+	uint8_t message_buffer[9 + 16 + 32] = {0};
+
+	//Unique Value
+	SECURE_ELEMENT_GetSerial(message_buffer);
+
+	//Pseudo RNG
+	for (int i = 9; i < sizeof (message_buffer); i += 2) {
+	        uint16_t random_bytes = rand();
+	        memcpy((uint8_t*)&message_buffer[i], &random_bytes, 2);
+	}
+	//Strong RNG from secure element
+	calib_random(atcab_device, &message_buffer[25]);
+
+	//Hash All RNG Data
+	sha256(message_buffer, sizeof (message_buffer), random);
+
+	printHex(message_buffer, sizeof (message_buffer), "message_buffer");
 }
 
 bool BTC_RestoreWallet(const char* mnemonic, char* passphrase, WALLET_t *w) {
@@ -485,7 +500,7 @@ void BITCOIN_UTIL_CreateWalletEncryptionKey() {
     printf("SYSTICK timestamp: %lu\n", (unsigned long)timestamp);
 
     //Grab secret pin
-    UI_CLI_HelperSetPIN();
+    //UI_CLI_HelperSetPIN(); //commented out so we just use default PIN
     
     memcpy(message, (const void *) 0x3FF00, 8);
 

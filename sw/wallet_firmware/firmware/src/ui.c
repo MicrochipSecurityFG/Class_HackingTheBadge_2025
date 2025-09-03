@@ -286,7 +286,8 @@ void UI_RestoreWalletFromPIN(void) {
 	LCD_MENU_EnterSubMenu();
 
     //add read PIN menu
-    SECURE_ELEMENT_ReadSlot8((uint8_t *)&wallet, sizeof(wallet));
+    //SECURE_ELEMENT_ReadSlot8((uint8_t *)&wallet, sizeof(wallet));
+	UI_CLI_ReadWallet();
 
     bool valid = bip39_validate_mnemonic(wallet.words);
     
@@ -374,6 +375,39 @@ void UI_CLI_RestoreWalletFromPIN_IRMode(void) {
 	}
 
 
+}
+
+void UI_CloseWallet(void) {
+
+	LCD_MENU_EnterSubMenu();
+
+	LCD_MENU_DisplayTextBuffer("<Wallet Closed>", 0);
+
+	printf("Closing...\n");
+	wallet.isLoaded = false;
+	memset(&wallet, 0x00, sizeof(WALLET_t));
+
+	LCD_MENU_DisplayTextBuffer(" ", 1);
+	LCD_MENU_DisplayTextBuffer("Press Reset", 2);
+	LCD_MENU_Set_MenuItem(mainMenu, 0);
+
+	LCD_MENU_RefreshScreen();
+
+	while(1);
+}
+
+void UI_SaveEncryptedWallet(void) {
+
+	LCD_MENU_EnterSubMenu();
+	LCD_MENU_DisplayTextBuffer("<Save Wallet>", 0);
+    LCD_MENU_DisplayTextBuffer("saving...", 1);
+    LCD_MENU_DisplayTextBuffer(" ", 2);
+    LCD_MENU_RefreshScreen();
+
+    BITCOIN_UTIL_CreateWalletEncryptionKey();
+    UI_SaveWallet();
+
+    LCD_MENU_DisplayTextBuffer("saved", 1);
 }
 
 void UI_ShowWords(void) {

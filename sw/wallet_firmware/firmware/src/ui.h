@@ -32,6 +32,8 @@ void UI_IrMenuSendMessage();
 void UI_PasswordAttackStart();
 void UI_PasswordAttackMenu();
 void UI_IrPasswordAttack();
+void UI_CloseWallet(void);
+void UI_SaveEncryptedWallet(void);
 
 void UI_CLI_CreateLogin(void);
 void UI_CreateLogin(void);

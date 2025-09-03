@@ -9,7 +9,7 @@
 #define MENU_PAGE_SIZE 3
 #define MAX_MENU_DEPTH 10  // Maximum depth of menu navigation
 #define APP_FIXED_STR_SIZE 20
-#define DEBOUNCE_TIME 120  // xx milliseconds
+#define DEBOUNCE_TIME 180  // xx milliseconds
 
 extern MenuItem mainMenu[];
 
@@ -68,7 +68,7 @@ MenuItem mainMenu[] = {
     {"Load Wallet", UI_RestoreWalletFromWords, resultsSubMenu, 2, (leFont*) & Font0},
     {"Load Saved", UI_RestoreWalletFromPIN, resultsSubMenu, 2, (leFont*) & Font0},
 	{"Timing Attack", UI_TimingAttack, resultsSubMenu, 3, (leFont*) & Font0},
-	{"Encryption Attack", UI_EncryptionAttack, resultsSubMenu, 3, (leFont*) & Font0},
+	//{"Encryption Attack", UI_EncryptionAttack, resultsSubMenu, 3, (leFont*) & Font0},
 };
 
 MenuItem accountMenu[] = {
@@ -76,11 +76,11 @@ MenuItem accountMenu[] = {
     {"Display Address", UI_DisplayAddress, resultsSubMenu, 3, (leFont*) & Font0},
     {"Sign Transaction",NULL, NULL, 3, (leFont*) & Font0},
     {"Show Words",      UI_ShowWords, resultsSubMenu, 3, (leFont*) & Font0},
-    {"Save Wallet",    UI_SaveWallet, resultsSubMenu, 3, (leFont*) & Font0},
+    {"Save Wallet",    UI_SaveEncryptedWallet, resultsSubMenu, 3, (leFont*) & Font0},
     {"Sign Message",    NULL, NULL, 3, (leFont*) & Font0},
     {"Verify Message",  NULL, NULL, 3, (leFont*) & Font0},
-    {"empty",           NULL, NULL, 3, (leFont*) & Font0},
-    {"Exit Wallet",    NULL, NULL, 3, (leFont*) & Font0},
+    {"",           NULL, NULL, 3, (leFont*) & Font0},
+    {"Exit Wallet",    UI_CloseWallet, resultsSubMenu, 3, (leFont*) & Font0},
 };
 
 DataEntryExitFunc exitFunc;
