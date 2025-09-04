@@ -14,3 +14,5 @@ Connected to COM3 at 115200 baud
 [13:10:40] Address: tb1qydu5j6neq8470t25ewl04prdq8ag5exauy0vn8
 
 [13:10:40] Address: tb1qydu5j6neq8470t25ewl04prdq8ag5exauy0vn8
+
+[13:10:40] Address: tb1qydu5j6neq8470t25ewl04prdq8ag5exauy0vn8
