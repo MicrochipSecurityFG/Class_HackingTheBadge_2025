@@ -20,3 +20,4 @@ typing_extensions==4.13.2
 urllib3==2.4.0
 qrcode==8.1
 readchar==4.2.1
+Pillow==10.0.0

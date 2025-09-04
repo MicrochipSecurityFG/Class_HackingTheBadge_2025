@@ -1,0 +1,15 @@
+https://mempool.space/testnet
+
+Connected to COM3 at 115200 baud
+[13:09:59] Address: tb1qazjl8ers6u4n49u07d343hfm7p8u8lmvg40t66
+[13:10:09] No Wallet Loaded
+[13:10:09] 1 - Create Login
+[13:10:09] 2 - Load Wallet
+[13:10:09] 3 - Load Saved Wallet
+[13:10:10] >
+[13:10:13] Reading 16 bytes from Slot 8
+[13:10:13] Reading 336 bytes from Slot 8
+[13:10:29] digest: 2379496a7901ebe7ad54cbbefa846d01fa8a64dd1fe33fbc53ca9a093a8ecbbc
+[13:10:30] tb1qydu5j6neq8470t25ewl04prdq8ag5exauy0vn8
+[13:10:40] Address: tb1qydu5j6neq8470t25ewl04prdq8ag5exauy0vn8
+ 
