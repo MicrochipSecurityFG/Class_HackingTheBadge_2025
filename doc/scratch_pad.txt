@@ -12,4 +12,5 @@ Connected to COM3 at 115200 baud
 [13:10:29] digest: 2379496a7901ebe7ad54cbbefa846d01fa8a64dd1fe33fbc53ca9a093a8ecbbc
 [13:10:30] tb1qydu5j6neq8470t25ewl04prdq8ag5exauy0vn8
 [13:10:40] Address: tb1qydu5j6neq8470t25ewl04prdq8ag5exauy0vn8
- 
+
+[13:10:40] Address: tb1qydu5j6neq8470t25ewl04prdq8ag5exauy0vn8
