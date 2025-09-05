@@ -26,7 +26,6 @@
 #include <stddef.h>                     // Defines NULL
 #include <stdbool.h>                    // Defines true
 #include <stdlib.h>                     // Defines EXIT_FAILURE
-#include "definitions.h"                // SYS function prototypes
 #include "lcd_menu.h"
 #include "cryptoauthlib.h"
 #include "secure_element.h"
@@ -39,20 +38,15 @@
 #define MAX_RAW_TX_SIZE 256  // Fixed size for raw transaction in bytes (adjust as needed)
 #define MAX_HEX_INPUT_SIZE (MAX_RAW_TX_SIZE * 2 + 1)  // Hex string length + null terminator
 
-#define PIN_MAX_LENGTH 12
+#define PIN_MAX_LENGTH 4
 #define ENCRYPTED_WALLET_SIZE 336
 
-typedef struct {
-    char walletPin[8];
-    char unused[248];
-} walletData;
-
-extern const walletData thisWalletData;
+extern const walletData_t thisWalletData;
 
 uint8_t attack_buffer[750];
 uint16_t attack_currentPosition = 0;
 
-//Brad Code
+//Brad CodewalletData_t
 
 long timestamp() {
     static long fake_time = 0;
@@ -285,9 +279,9 @@ void UI_RestoreWalletFromPIN(void) {
 
 	LCD_MENU_EnterSubMenu();
 
-    //add read PIN menu
-    //SECURE_ELEMENT_ReadSlot8((uint8_t *)&wallet, sizeof(wallet));
-	UI_CLI_ReadWallet();
+    // Derive encryption key using current PIN (no PIN entry required for LCD menu)
+    BITCOIN_UTIL_DeriveEncryptionKey();
+    UI_CLI_ReadWallet();
 
     bool valid = bip39_validate_mnemonic(wallet.words);
     
@@ -323,20 +317,34 @@ void UI_CLI_RestoreWalletFromPIN_IRMode(void) {
     uint8_t u8_index = 0; // Index for accessing buffer positions.
     char input_char = 0; // Variable to hold each character read from the USART.
     memset(entered_pin, 0x00, sizeof (entered_pin));
-    // Continuously read characters until the password buffer is full.
-    while ((u8_index < PIN_MAX_LENGTH)) {
+    
+    // Read up to 4 digits, allowing Enter at any time
+    while (u8_index < PIN_MAX_LENGTH) {
         // Wait until data is ready to be received from USART.
         while (!MULTI_COMM_ReceiverIsReady());
         // Read a byte from USART.
         input_char = MULTI_COMM_ReadByte(NULL);
-        u8_index++;
-        // Check if the received character is a line feed
+        
+        // If Enter is pressed, complete the input
         if (input_char == LINE_FEED) {
-        	entered_pin[u8_index] = '\0'; // Null-terminate the string to end input.
             break;
-        } else {
-            // Store the received character into the buffer and increment the index.
-        	entered_pin[u8_index - 1] = input_char;
+        }
+        // Only accept numeric digits
+        else if (input_char >= '0' && input_char <= '9') {
+            entered_pin[u8_index] = input_char;
+            u8_index++;
+        }
+        // Ignore other characters
+    }
+    
+    // If we have exactly 4 digits, we MUST have Enter to complete
+    if (u8_index == PIN_MAX_LENGTH) {
+        // Wait for Enter to complete the input
+        while (!MULTI_COMM_ReceiverIsReady());
+        input_char = MULTI_COMM_ReadByte(NULL);
+        // If Enter is not pressed, the PIN is invalid
+        if (input_char != LINE_FEED) {
+            u8_index = 0; // Mark as invalid
         }
     }
 
@@ -382,18 +390,20 @@ void UI_CloseWallet(void) {
 	LCD_MENU_EnterSubMenu();
 
 	LCD_MENU_DisplayTextBuffer("<Wallet Closed>", 0);
+	LCD_MENU_DisplayTextBuffer(" ", 1);
+	LCD_MENU_DisplayTextBuffer(" ", 2);
 
-	printf("Closing...\n");
+	printf("Closing wallet...\n");
 	wallet.isLoaded = false;
 	memset(&wallet, 0x00, sizeof(WALLET_t));
 
-	LCD_MENU_DisplayTextBuffer(" ", 1);
-	LCD_MENU_DisplayTextBuffer("Press Reset", 2);
-	LCD_MENU_Set_MenuItem(mainMenu, 0);
-
 	LCD_MENU_RefreshScreen();
 
-	while(1);
+	// Reset menu system to return to main menu
+	LCD_MENU_ResetToMainMenu();
+	
+	// Refresh screen to show main menu
+	LCD_MENU_RefreshScreen();
 }
 
 void UI_SaveEncryptedWallet(void) {
@@ -404,7 +414,8 @@ void UI_SaveEncryptedWallet(void) {
     LCD_MENU_DisplayTextBuffer(" ", 2);
     LCD_MENU_RefreshScreen();
 
-    BITCOIN_UTIL_CreateWalletEncryptionKey();
+    BITCOIN_UTIL_GenerateNewSalt();
+    BITCOIN_UTIL_DeriveEncryptionKey();
     UI_SaveWallet();
 
     LCD_MENU_DisplayTextBuffer("saved", 1);

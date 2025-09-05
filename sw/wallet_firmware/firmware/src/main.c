@@ -27,15 +27,12 @@
 #include <stdlib.h>                     // Defines EXIT_FAILURE
 #include "definitions.h"                // SYS function prototypes
 #include "lcd_menu.h"
-#include "cryptoauthlib.h"
 #include "secure_element.h"
 #include "ui.h"
 #include "util.h"
 #include "lcd_menu.h"
 #include "multi_comm.h"
 #include "ir.h"
-#include "hash.h"
-#include "ecdsa.h"
 #include <time.h>
 
 #include "bip32.h"
@@ -43,30 +40,28 @@
 #include "bitcoin_util.h"
 #include "hmac_sha512.h"
 #include "aes.h"
-#include "atca_helpers.h"
 
 #include <stdint.h> // For uint32_t
 #include <string.h> // For strncpy
 #include <ctype.h>
 
-// Define a structure with the first 8 bytes as characters and the rest as an unused byte array
-typedef struct {
-    char walletPin[8];
-    char unused[248];
-} walletData;
+// Global variable to hold the wallet data loaded from flash
+walletData_t thisWalletData;
 
-// Reserve the structure at the specified flash memory address
-const walletData __attribute__((address(0x3FF00), keep)) thisWalletData = {
-    .walletPin = "12345678", // Initialize the first 8 bytes
-    .unused =
-    {0} // Initialize the rest to zero
-};
-
-
+// Function to load wallet data from flash memory
 // SysTick configuration (raw counter, no interrupts)
 #define SYSTICK_MAX_COUNT (0xFFFFFFF) // 24-bit counter
 
 void MAIN_Init(void);
+void generateRandomPIN(char* pin);
+bool isFirstBoot(void);
+void initializePIN(void);
+void loadWalletDataFromFlash(void);
+
+// Function to load wallet data from flash memory
+void loadWalletDataFromFlash(void) {
+    memcpy(&thisWalletData, (const void *) 0x3FF00, sizeof(walletData_t));
+}
 
 uint8_t u8_AES_Key[16];
 uint8_t aesKey_Expanded[176];
@@ -75,7 +70,7 @@ rx_t rx;
 #define ENCRYPTED_WALLET_SIZE 336
 #define PLAIN_TEXT_WALLET_SIZE 326
 
-#define PIN_MAX_LENGTH 12
+#define PIN_MAX_LENGTH 4
 
 //m/84'/1'/0'x
 extern uint32_t path[4];
@@ -88,6 +83,64 @@ static inline uint32_t SysTickDiffToUs(uint32_t start, uint32_t end) {
     // Handle wraparound (down-counter)
     uint32_t diff = (start >= end) ? (start - end) : (SYSTICK_MAX_COUNT - end + start + 1);
     return diff;
+}
+
+// Function to generate a random 4-digit PIN
+void generateRandomPIN(char* pin) {
+    uint8_t random_bytes[32];
+    ATCA_STATUS status;
+    
+    // Get random bytes from secure element
+    status = atcab_random(random_bytes);
+    if (status != ATCA_SUCCESS) {
+        // Fallback to rand() if secure element fails
+        for (int i = 0; i < 4; i++) {
+            pin[i] = '0' + (rand() % 10);
+        }
+    } else {
+        // Generate 4 digits using the random bytes (now we have 32 bytes to work with)
+        for (int i = 0; i < 4; i++) {
+            pin[i] = '0' + (random_bytes[i] % 10);
+        }
+    }
+    pin[4] = '\0'; // Null terminate
+    // Pad remaining bytes with zeros for flash storage compatibility
+    for (int i = 4; i < 8; i++) {
+        pin[i] = '\0';
+    }
+}
+
+// Function to check if this is first boot (PIN is still default)
+bool isFirstBoot() {
+    return (strcmp(thisWalletData.walletPin, "0000") == 0);
+}
+
+// Function to initialize PIN on first boot
+void initializePIN() {
+    if (isFirstBoot()) {
+        walletData_t tempWallet;
+        char newPin[9];
+        
+        // Generate random PIN
+        generateRandomPIN(newPin);
+        
+        // Read current flash data
+        memcpy(&tempWallet, (const void *) 0x3FF00, 256);
+        
+        // Update PIN (copy 4 digits + 4 zero padding)
+        memcpy(tempWallet.walletPin, newPin, 8);
+        
+        // Erase and write back to flash
+        NVMCTRL_RowErase(0x3FF00);
+        while (NVMCTRL_IsBusy());
+        NVMCTRL_PageWrite((uint32_t *) &tempWallet, 0x3FF00);
+        while (NVMCTRL_IsBusy());
+        
+        // Reload the data from flash to update thisWalletData
+        loadWalletDataFromFlash();
+        
+        printf("Generated new PIN: %s\n", newPin);
+    }
 }
 
 void SECURE_ELEMENT_GetRandom(uint8_t * random) { 
@@ -132,7 +185,7 @@ bool BTC_RestoreWallet(const char* mnemonic, char* passphrase, WALLET_t *w) {
     uint8_t name_buffer[64];
     hmacSha512(name_buffer, (const uint8_t *) "Wallet Name", 11, w->master_node, 64);
     sprintf(w->name, "%02x%02x", name_buffer[0], name_buffer[1]);
-    w->name[5] = '\0'; // Null terminate the string
+    w->name[4] = '\0'; // Null terminate the string
     memcpy(w->words, mnemonic, strlen(mnemonic));
     w->isLoaded = true;
     return true;
@@ -159,7 +212,7 @@ void UI_CLI_DisplayAddresses(void) {
 
 void UI_CLI_RestoreWalletFromPIN(void) {
     //Step 2.0 Load Wallet
-    char entered_pin[PIN_MAX_LENGTH];
+    char entered_pin[PIN_MAX_LENGTH + 1] = {0};
 
     //Display Selected option
     printf("Open saved wallet with PIN\n");
@@ -170,20 +223,34 @@ void UI_CLI_RestoreWalletFromPIN(void) {
     uint8_t u8_index = 0; // Index for accessing buffer positions.
     char input_char = 0; // Variable to hold each character read from the USART.
     memset(entered_pin, 0x00, sizeof (entered_pin));
-    // Continuously read characters until the password buffer is full.
-    while ((u8_index < PIN_MAX_LENGTH)) {
+    
+    // Read up to 4 digits, allowing Enter at any time
+    while (u8_index < PIN_MAX_LENGTH) {
         // Wait until data is ready to be received from USART.
         while (!MULTI_COMM_ReceiverIsReady());
         // Read a byte from USART.
         input_char = MULTI_COMM_ReadByte(NULL);
-        u8_index++;
-        // Check if the received character is a line feed
+        
+        // If Enter is pressed, complete the input
         if (input_char == LINE_FEED) {
-            entered_pin[u8_index] = '\0'; // Null-terminate the string to end input.
             break;
-        } else {
-            // Store the received character into the buffer and increment the index.
-            entered_pin[u8_index - 1] = input_char;
+        }
+        // Only accept numeric digits
+        else if (input_char >= '0' && input_char <= '9') {
+            entered_pin[u8_index] = input_char;
+            u8_index++;
+        }
+        // Ignore other characters
+    }
+    
+    // If we have exactly 4 digits, we MUST have Enter to complete
+    if (u8_index == PIN_MAX_LENGTH) {
+        // Wait for Enter to complete the input
+        while (!MULTI_COMM_ReceiverIsReady());
+        input_char = MULTI_COMM_ReadByte(NULL);
+        // If Enter is not pressed, the PIN is invalid
+        if (input_char != LINE_FEED) {
+            u8_index = 0; // Mark as invalid
         }
     }
 
@@ -204,6 +271,8 @@ void UI_CLI_RestoreWalletFromPIN(void) {
 
         return;
     }
+
+    printf("\n");
     MULTI_COMM_Print("Valid PIN!\n", true);
     //Load wallet from secure element
     //Step 3.2 Add Encryption
@@ -279,6 +348,59 @@ void UI_DisplayAddress(void) {
     resultsSubMenu[0].action = UI_SendAddress;
 
     LCD_MENU_BufferToDisplayText(ui_screen_text, strlen(ui_screen_text), MENU_MODE_RESULTS);
+}
+
+void UI_DisplayCurrentPIN(void) {
+    LCD_MENU_EnterSubMenu();
+
+    // Display PIN information
+    LCD_MENU_DisplayTextBuffer("Current PIN:", 0);
+    // Create a local copy to avoid const qualifier issues
+
+    strncpy(ui_screen_text, thisWalletData.walletPin, 4);
+    ui_screen_text[4] = '\0';
+    LCD_MENU_DisplayTextBuffer(ui_screen_text, 1);
+    LCD_MENU_DisplayTextBuffer("Press LEFT to exit", 2);
+
+    LCD_MENU_RefreshScreen();
+}
+
+void UI_GenerateNewPIN(void) {
+    LCD_MENU_EnterSubMenu();
+
+    // Display generating message
+    LCD_MENU_DisplayTextBuffer("Generating new PIN...", 0);
+    LCD_MENU_DisplayTextBuffer(" ", 1);
+    LCD_MENU_DisplayTextBuffer(" ", 2);
+    LCD_MENU_RefreshScreen();
+
+    // Generate new PIN
+    generateRandomPIN(ui_screen_text);
+    ui_screen_text[4] = '\0';
+
+    // Update the PIN in flash memory
+    walletData_t tempWallet;
+    memcpy(&tempWallet, (const void *) 0x3FF00, 256);
+    // Copy 4-digit PIN and pad with zeros
+    memcpy(tempWallet.walletPin, ui_screen_text, 4);
+    memset(tempWallet.walletPin + 4, '\0', 4);
+    
+    // Erase and write back to flash
+    NVMCTRL_RowErase(0x3FF00);
+    while (NVMCTRL_IsBusy());
+    NVMCTRL_PageWrite((uint32_t *) &tempWallet, 0x3FF00);
+    while (NVMCTRL_IsBusy());
+
+    // Reload the data from flash to update thisWalletData
+    loadWalletDataFromFlash();
+
+    // Display the new PIN
+    LCD_MENU_DisplayTextBuffer("New PIN generated:", 0);
+    LCD_MENU_DisplayTextBuffer(ui_screen_text, 1);
+    LCD_MENU_DisplayTextBuffer("Press LEFT to exit", 2);
+    LCD_MENU_RefreshScreen();
+
+    printf("Generated new PIN: %s\n", ui_screen_text);
 }
 
 void UI_EncryptionAttack(void) {
@@ -451,10 +573,10 @@ success_exit:
 //Step 3.0 Add Encryption
 void UI_CLI_HelperSetPIN() {
     char entered_pin[32];
-    walletData tempWallet;
+    walletData_t tempWallet;
 
     // Prompt user for PIN
-    printf("Enter new 8 digit PIN: ");
+    printf("Enter new 4 digit PIN: ");
     if (fgets(entered_pin, sizeof (entered_pin), stdin) == NULL) {
         printf("Error reading PIN input.\n");
         return;
@@ -462,12 +584,12 @@ void UI_CLI_HelperSetPIN() {
     // Remove trailing newline from fgets
     entered_pin[strcspn(entered_pin, "\n")] = 0;
     // Check length
-    if (strlen(entered_pin) != 8) {
-        printf("PIN must be exactly 8 digits.\n");
+    if (strlen(entered_pin) != 4) {
+        printf("PIN must be exactly 4 digits.\n");
         return;
     }
     // Check that all characters are digits
-    for (int i = 0; i < 8; i++) {
+    for (int i = 0; i < 4; i++) {
         if (!isdigit((unsigned char) entered_pin[i])) {
             printf("PIN must contain only digits.\n");
             return;
@@ -479,8 +601,9 @@ void UI_CLI_HelperSetPIN() {
     //Store the PIN securely here
     // Read the flash memory
     memcpy(&tempWallet, (const void *) 0x3FF00, 256);
-    //Modify
-    memcpy(tempWallet.walletPin, entered_pin, 8);
+    //Modify - copy 4-digit PIN and pad with zeros
+    memcpy(tempWallet.walletPin, entered_pin, 4);
+    memset(tempWallet.walletPin + 4, '\0', 4);
     //Erase
     NVMCTRL_RowErase(0x3FF00);
     while (NVMCTRL_IsBusy());
@@ -489,35 +612,52 @@ void UI_CLI_HelperSetPIN() {
     while (NVMCTRL_IsBusy());     
 }
 
-void BITCOIN_UTIL_CreateWalletEncryptionKey() {
-    uint8_t digestkey[32];
+// Generate a new salt and store it in slot 5
+void BITCOIN_UTIL_GenerateNewSalt() {
     uint32_t timestamp;
-    uint8_t message[256];
     
-    printf("Generating encryption key...\n");
-    //Grab random time stamp
+    printf("Generating new salt...\n");
+    
+    // Generate random timestamp as salt
     timestamp = SYSTICK_TimerCounterGet();
-    printf("SYSTICK timestamp: %lu\n", (unsigned long)timestamp);
+    printf("SYSTICK timestamp (salt): %lu\n", (unsigned long)timestamp);
 
-    //Grab secret pin
-    //UI_CLI_HelperSetPIN(); //commented out so we just use default PIN
+    // Store only the salt in slot 5 (4 bytes)
+    SECURE_ELEMENT_WriteSlot5((uint8_t*)&timestamp, 4);
     
-    memcpy(message, (const void *) 0x3FF00, 8);
+    printf("Salt generated and stored.\n");
+}
 
-    //Add in time stamp
-    message[8] = (timestamp >> 16) & 0xFF;
-    message[9] = (timestamp >> 8) & 0xFF;
-    message[10] = timestamp & 0xFF;
-    sha256(message, 11, digestkey);
+// Derive encryption key from PIN + salt (common function for both save and load)
+void BITCOIN_UTIL_DeriveEncryptionKey() {
+    uint8_t digestkey[32];
+    uint32_t salt;
+    uint8_t message[12] = {0};
     
-    printf("\n\n Generation Complete!\n");
+    printf("Deriving encryption key...\n");
+    
+    // Read salt from slot 5 (4 bytes)
+    SECURE_ELEMENT_ReadSlot5((uint8_t*)&salt, 4);
+    printf("Using salt: %lu\n", (unsigned long)salt);
 
-    //Store key on secure element
-    UTIL_PrintArray(message, 16);
+    // Copy PIN from flash (4 digits)
+    memcpy(message, (const void *) 0x3FF00, 4);
+
+    // Add salt to message
+    message[4] = (salt >> 24) & 0xFF;
+    message[5] = (salt >> 16) & 0xFF;
+    message[6] = (salt >> 8) & 0xFF;
+    message[7] = salt & 0xFF;
+    
+    // Hash PIN + salt to create encryption key
+    sha256(message, 8, digestkey);
+    
+    printf("Key derivation complete.\n");
+
+    UTIL_PrintArray(message, 8);
     UTIL_PrintArray(digestkey, 16);
-    SECURE_ELEMENT_WriteSlot5(digestkey, 16);
 
-    //Copy key to RAM
+    //Copy key to RAM (never store the key in secure element)
     memcpy(u8_AES_Key, digestkey, 16);
     //Expand key for AES usage
     aesExpandKey(aesKey_Expanded, u8_AES_Key);
@@ -527,9 +667,8 @@ void UI_CLI_ReadWallet(){
     uint8_t CipherText[ENCRYPTED_WALLET_SIZE];
     size_t outLength = 0;
 
-    //Read wallet
-    SECURE_ELEMENT_ReadSlot5(u8_AES_Key, 16);
-    aesExpandKey(aesKey_Expanded, u8_AES_Key);
+    // Derive encryption key from existing PIN + salt
+    BITCOIN_UTIL_DeriveEncryptionKey();
 
     SECURE_ELEMENT_ReadSlot8(CipherText, 336);
 
@@ -630,7 +769,8 @@ int main(void) {
 						break;
 					case '5':
 						//Step 3.3 Add Encryption
-                        BITCOIN_UTIL_CreateWalletEncryptionKey();
+                        BITCOIN_UTIL_GenerateNewSalt();
+                        BITCOIN_UTIL_DeriveEncryptionKey();
                         UI_SaveWallet();
 						break;
 					case '6':
@@ -689,6 +829,12 @@ void MAIN_Init(void) {
     uint32_t seed = SYSTICK_TimerCounterGet();
     srand(seed);
     //printf("seed: %lu", seed); //TODO: debug only remove
+
+    // Load wallet data from flash memory
+    loadWalletDataFromFlash();
+
+    // Initialize PIN on first boot
+    initializePIN();
 
     bool islocked = false;
     status = atcab_is_locked(LOCK_ZONE_CONFIG, &islocked);

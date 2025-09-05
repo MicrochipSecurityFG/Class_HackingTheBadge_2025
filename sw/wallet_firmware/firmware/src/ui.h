@@ -19,7 +19,6 @@
 #define _UI_H
 
 #include "../src/config/default/peripheral/systick/plib_systick.h"
-#include <stdio.h>
 
 void UI_CLI_BackupMenu();
 void UI_CLI_MemoryCheck();
@@ -59,12 +58,21 @@ void UI_CLI_SignRawTransaction(void);
 
 void UI_TimingAttack(void);
 void UI_EncryptionAttack(void);
+void UI_DisplayPIN(void);
+void UI_DisplayCurrentPIN(void);
+void UI_GenerateNewPIN(void);
 void UI_CLI_ReadWallet(void);
 
 void UI_CLI_RestoreWalletFromPIN_IRMode(void);
 
 void UI_HelperEncryptionAttackRXHandler(char *remoteBuffer, uint16_t length);
 void UI_HelperEncryptionAttackPrint(void);
+
+// Define a structure with the first 8 bytes as characters and the rest as an unused byte array
+typedef struct {
+  char walletPin[4];  // Still 8 bytes to maintain flash layout compatibility
+  char unused[252];
+} walletData_t;
 
 //Added Prototype - Brad 4/30 TODO: Remove this line
 int strcmp(const char *a, const char *b);

@@ -6,9 +6,9 @@ from typing import Tuple
 # === CONFIGURATION ===
 BAUDRATE = 115200
 CHARSET = '0123456789'
-MAX_PASSWORD_LENGTH = 15
-TRIALS_PER_CHAR = 3
-SUCCESS_STRING = b"Valid PIN!"
+MAX_PASSWORD_LENGTH = 4
+TRIALS_PER_CHAR = 1
+SUCCESS_STRING = b"Valid PIN"
 
 # === SELECT COM PORT ===
 def list_serial_ports():
@@ -54,14 +54,14 @@ def measure_timing(candidate: str, ser: serial.Serial) -> Tuple[float, bool]:
             # First byte received: capture timestamp
             if recv_time is None:
                 recv_time = time.perf_counter_ns()
-                if byte != b'V':  # You can adjust this if needed
-                    break
 
             response += byte
 
             if SUCCESS_STRING in response:
                 elapsed = recv_time - send_time
+                print(f"[✓] Valid PIN found: {response.decode().strip()}")
                 return elapsed, True  # Early exit on success
+
 
         if recv_time is None:
             recv_time = time.perf_counter_ns()
@@ -91,6 +91,9 @@ def prepare_for_pin_entry(ser: serial.Serial, timeout: float = 1.0) -> bool:
         if byte:
             response += byte
             if b"Enter PIN: " in response:
+                return True
+            if SUCCESS_STRING in response:
+                print(f"[✓] Valid PIN found during preparation: {response.decode().strip()}")
                 return True
 
     print("[!] Timeout waiting for 'Enter PIN:' prompt.")

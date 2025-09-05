@@ -96,6 +96,8 @@ int parse_bitcoin_tx(uint8_t* tx_data, size_t tx_size, BitcoinTxParseResult* res
 void uint64_to_le_bytes(uint64_t value, uint8_t* bytes);
 void hash_outputs(BitcoinTxParseResult* tx_parse, uint8_t* msg, size_t* pos);
 bool BTC_RestoreWallet(const char* mnemonic, char* passphrase, WALLET_t *w);
+void BITCOIN_UTIL_GenerateNewSalt();
+void BITCOIN_UTIL_DeriveEncryptionKey();
 
 #endif /* _BITCOIN_UTIL_H */
 

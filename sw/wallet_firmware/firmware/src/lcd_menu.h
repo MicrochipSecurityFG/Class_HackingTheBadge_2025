@@ -27,6 +27,7 @@
 
 /* This section lists the other files that are included in this file.
  */
+#include "config/default/gfx/legato/font/legato_font.h"
 
 
 
@@ -65,6 +66,7 @@ void LCD_MENU_ButtonTasks(void);
 
 void LCD_MENU_Init(void);
 void LCD_MENU_Init_Account(void);
+void LCD_MENU_ResetToMainMenu(void);
 void LCD_MENU_BufferToDisplayText(char *buffer, size_t bufferLength, MenuMode menuMode);
 void LCD_MENU_EnterDataEntryMenuMode(void);
 

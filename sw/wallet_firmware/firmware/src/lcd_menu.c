@@ -1,6 +1,5 @@
 #include <stdint.h>
 #include <stdlib.h>  // For atoi function
-#include "definitions.h"  // SYS function prototypes
 #include "time.h"
 #include "ir.h"
 #include "ui.h"
@@ -63,12 +62,19 @@ MenuItem resultsSubMenu[] = {
     {NULL, NULL, NULL, 0, (leFont*)&Font0},
 };
 
+MenuItem pinSubMenu[] = {
+    {"View Current PIN", UI_DisplayCurrentPIN, resultsSubMenu, 3, (leFont*) & Font0},
+    {"Generate New PIN", UI_GenerateNewPIN, resultsSubMenu, 3, (leFont*) & Font0},
+    {"Back", NULL, NULL, 0, (leFont*) & Font0},
+};
+
 MenuItem mainMenu[] = {
     {"Create Login", UI_CreateLogin, resultsSubMenu, 6, (leFont*) & Font0},
     {"Load Wallet", UI_RestoreWalletFromWords, resultsSubMenu, 2, (leFont*) & Font0},
     {"Load Saved", UI_RestoreWalletFromPIN, resultsSubMenu, 2, (leFont*) & Font0},
+    {"PIN Actions", NULL, pinSubMenu, 3, (leFont*) & Font0},
 	{"Timing Attack", UI_TimingAttack, resultsSubMenu, 3, (leFont*) & Font0},
-	//{"Encryption Attack", UI_EncryptionAttack, resultsSubMenu, 3, (leFont*) & Font0},
+	
 };
 
 MenuItem accountMenu[] = {
@@ -202,6 +208,20 @@ void LCD_MENU_Init_Account(void) {
     currentMenuDepth = 0;
     selectedItemIndex = 0;
     currentMenu = startMenu;
+}
+
+void LCD_MENU_ResetToMainMenu(void) {
+	startMenu = mainMenu;
+	currentMenuSize = sizeof(mainMenu) / sizeof(mainMenu[0]);
+	totalPages = (currentMenuSize + MENU_PAGE_SIZE - 1) / MENU_PAGE_SIZE;
+	currentPage = 0;
+	currentScreenState = 0;
+	
+	// Clear menu stack and reset navigation state
+	memset(menuStack, 0x00, sizeof(menuStack));
+	currentMenuDepth = 0;
+	selectedItemIndex = 0;
+	currentMenu = startMenu;
 }
 
 void LCD_MENU_EnterDataEntryMenuMode(void) {
